@@ -26,10 +26,9 @@
 # on how to set those paths for Mach-O binaries.
 #
 set -eu
-
 # See note in toolchain/internal/configure.bzl where we define
 # `wrapper_bin_prefix` for why this wrapper is needed.
-
+echo "HELLO WORLD"
 # Call the C++ compiler.
 if [[ -f %{toolchain_path_prefix}bin/clang ]]; then
   exec %{toolchain_path_prefix}bin/clang "$@"
@@ -40,7 +39,7 @@ elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
   # we'll try to find `clang` relative to this script.
   # This script is at _execroot_/external/_repo_name_/bin/clang_wrapper.sh
   execroot_path="${BASH_SOURCE[0]%/*/*/*/*}"
-  clang="${execroot_path}/%{toolchain_path_prefix}bin/clang"
+  clang="${execroot_path}/%{toolchain_path_prefix}bin/circle"
   exec "${clang}" "${@}"
 else
   >&2 echo "ERROR: could not find clang; PWD=\"$(pwd)\"; PATH=\"${PATH}\"."

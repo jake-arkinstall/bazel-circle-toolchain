@@ -37,7 +37,7 @@ def _include_dirs_str(rctx, key):
         return ""
     return ("\n" + 12 * " ").join(["\"%s\"," % d for d in dirs])
 
-def llvm_config_impl(rctx):
+def circle_config_impl(rctx):
     _check_os_arch_keys(rctx.attr.toolchain_roots)
     _check_os_arch_keys(rctx.attr.sysroot)
     _check_os_arch_keys(rctx.attr.cxx_builtin_include_directories)
@@ -46,7 +46,7 @@ def llvm_config_impl(rctx):
     if os == "windows":
         rctx.file("BUILD.bazel")
         rctx.file("toolchains.bzl", """\
-def llvm_register_toolchains():
+def circle_register_toolchains():
     pass
 """)
         return
@@ -65,21 +65,21 @@ def llvm_register_toolchains():
         use_absolute_paths = True
 
     if use_absolute_paths:
-        llvm_repo_label = Label(toolchain_root + ":BUILD.bazel")  # Exact target does not matter.
-        llvm_repo_path = _canonical_dir_path(str(rctx.path(llvm_repo_label).dirname))
+        circle_repo_label = Label(toolchain_root + ":BUILD.bazel")  # Exact target does not matter.
+        circle_repo_path = _canonical_dir_path(str(rctx.path(circle_repo_label).dirname))
         config_repo_path = _canonical_dir_path(str(rctx.path("")))
-        toolchain_path_prefix = llvm_repo_path
-        tools_path_prefix = llvm_repo_path
+        toolchain_path_prefix = circle_repo_path
+        tools_path_prefix = circle_repo_path
         wrapper_bin_prefix = config_repo_path
     else:
-        llvm_repo_path = _pkg_path_from_label(Label(toolchain_root + ":BUILD.bazel"))
+        circle_repo_path = _pkg_path_from_label(Label(toolchain_root + ":BUILD.bazel"))
         config_repo_path = "external/%s/" % rctx.name
 
         # tools can only be defined in a subdirectory of config_repo_path,
         # because their paths are relative to the package defining
         # cc_toolchain, and cannot contain '..'.
         # https://github.com/bazelbuild/bazel/issues/7746.  To work around
-        # this, we symlink the llvm repo under the package so all tools (except
+        # this, we symlink the circle repo under the package so all tools (except
         # clang) can be called with normalized relative paths. For clang
         # however, using a path with symlinks interferes with the header file
         # inclusion validation checks, because clang frontend will infer the
@@ -88,9 +88,9 @@ def llvm_register_toolchains():
         # validation check. So we always use a cc_wrapper (which is called
         # through a normalized relative path), and then call clang with the not
         # symlinked path from the wrapper.
-        rctx.symlink("../../" + llvm_repo_path, "llvm")
-        toolchain_path_prefix = llvm_repo_path
-        tools_path_prefix = "llvm/"
+        rctx.symlink("../../" + circle_repo_path, "circle")
+        toolchain_path_prefix = circle_repo_path
+        tools_path_prefix = "circle/"
         wrapper_bin_prefix = ""
 
     default_sysroot_path = _default_sysroot_path(rctx, os)
@@ -106,7 +106,7 @@ def llvm_register_toolchains():
         additional_include_dirs_dict = rctx.attr.cxx_builtin_include_directories,
         sysroot_dict = rctx.attr.sysroot,
         default_sysroot_path = default_sysroot_path,
-        llvm_version = rctx.attr.llvm_version,
+        circle_version = rctx.attr.circle_version,
     )
     host_tools_info = dict([
         pair
@@ -183,7 +183,7 @@ def _cc_toolchains_str(
 
     # Note that for cross-compiling, the toolchain configuration will need
     # appropriate sysroots. A recommended approach is to configure two
-    # `llvm_toolchain` repos, one without sysroots (for easy single platform
+    # `circle_toolchain` repos, one without sysroots (for easy single platform
     # builds) and register this one, and one with sysroots and provide
     # `--extra_toolchains` flag when cross-compiling.
 
@@ -235,7 +235,7 @@ def _cc_toolchain_str(
             # TODO: Are there situations where we can continue?
             return ""
 
-    extra_files_str = ", \":llvm\", \":wrapper-files\""
+    extra_files_str = ", \":circle\", \":wrapper-files\""
 
     additional_include_dirs = toolchain_info.additional_include_dirs_dict.get(_os_arch_pair(target_os, target_arch))
     additional_include_dirs_str = "[]"
@@ -264,7 +264,7 @@ cc_toolchain_config(
     wrapper_bin_prefix = "{wrapper_bin_prefix}",
     sysroot_path = "{sysroot_path}",
     additional_include_dirs = {additional_include_dirs_str},
-    llvm_version = "{llvm_version}",
+    circle_version = "{circle_version}",
     host_tools_info = {host_tools_info},
 )
 
@@ -370,7 +370,7 @@ cc_toolchain(
         additional_include_dirs_str = additional_include_dirs_str,
         sysroot_label_str = sysroot_label_str,
         sysroot_path = sysroot_path,
-        llvm_version = toolchain_info.llvm_version,
+        circle_version = toolchain_info.circle_version,
         extra_files_str = extra_files_str,
         host_tools_info = host_tools_info,
     )

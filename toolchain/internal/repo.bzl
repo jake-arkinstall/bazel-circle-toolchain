@@ -17,11 +17,11 @@ load(
     _os = "os",
 )
 load(
-    "//toolchain/internal:llvm_distributions.bzl",
-    _download_llvm_preconfigured = "download_llvm_preconfigured",
+    "//toolchain/internal:circle_builds.bzl",
+    _download_circle = "download_circle",
 )
 
-def llvm_repo_impl(rctx):
+def circle_repo_impl(rctx):
     os = _os(rctx)
     if os == "windows":
         rctx.file("BUILD", executable = False)
@@ -29,13 +29,13 @@ def llvm_repo_impl(rctx):
 
     rctx.file(
         "BUILD.bazel",
-        content = rctx.read(Label("//toolchain:BUILD.llvm_repo")),
+        content = rctx.read(Label("//toolchain:BUILD.circle_repo")),
         executable = False,
     )
 
-    _download_llvm_preconfigured(rctx)
+    _download_circle(rctx)
 
-    # We try to avoid patches to the downloaded repo so that it is easier for
-    # users to bring their own LLVM distribution through `http_archive`. If we
-    # do want to make changes, then we should do it through a patch file, and
-    # document it for users of toolchain_roots attribute.
+# We try to avoid patches to the downloaded repo so that it is easier for
+# users to bring their own LLVM distribution through `http_archive`. If we
+# do want to make changes, then we should do it through a patch file, and
+# document it for users of toolchain_roots attribute.

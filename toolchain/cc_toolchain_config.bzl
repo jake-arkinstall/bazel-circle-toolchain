@@ -37,7 +37,7 @@ def cc_toolchain_config(
         wrapper_bin_prefix,
         sysroot_path,
         additional_include_dirs,
-        llvm_version,
+        circle_version,
         host_tools_info = {}):
     host_os_arch_key = _os_arch_pair(host_os, host_arch)
     target_os_arch_key = _os_arch_pair(target_os, target_arch)
@@ -94,7 +94,7 @@ def cc_toolchain_config(
         "-D__DATE__=\"redacted\"",
         "-D__TIMESTAMP__=\"redacted\"",
         "-D__TIME__=\"redacted\"",
-        "-fdebug-prefix-map={}=__bazel_toolchain_llvm_repo__/".format(toolchain_path_prefix),
+        "-fdebug-prefix-map={}=__bazel_toolchain_circle_repo__/".format(toolchain_path_prefix),
     ]
 
     is_xcompile = not (host_os == target_os and host_arch == target_arch)
@@ -206,8 +206,8 @@ def cc_toolchain_config(
     # C++ built-in include directories:
     cxx_builtin_include_directories = [
         toolchain_path_prefix + "include/c++/v1",
-        toolchain_path_prefix + "lib/clang/{}/include".format(llvm_version),
-        toolchain_path_prefix + "lib64/clang/{}/include".format(llvm_version),
+        toolchain_path_prefix + "lib/clang/{}/include".format(circle_version),
+        toolchain_path_prefix + "lib64/clang/{}/include".format(circle_version),
     ]
 
     sysroot_prefix = ""
@@ -232,43 +232,21 @@ def cc_toolchain_config(
     ## NOTE: make variables are missing here; unix_cc_toolchain_config doesn't
     ## pass these to `create_cc_toolchain_config_info`.
 
-    # Tool paths:
-    # `llvm-strip` was introduced in V7 (https://reviews.llvm.org/D46407):
-    llvm_version = llvm_version.split(".")
-    llvm_major_ver = int(llvm_version[0]) if len(llvm_version) else 0
-    strip_binary = (tools_path_prefix + "bin/llvm-strip") if llvm_major_ver >= 7 else _host_tools.get_and_assert(host_tools_info, "strip")
-
-    # TODO: The command line formed on darwin does not work with llvm-ar.
-    ar_binary = tools_path_prefix + "bin/llvm-ar"
-    if host_os == "darwin":
-        # Bazel uses arg files for longer commands; some old macOS `libtool`
-        # versions do not support this.
-        #
-        # In these cases we want to use `libtool_wrapper.sh` which translates
-        # the arg file back into command line arguments.
-        if not _host_tools.tool_supports(host_tools_info, "libtool", features = [_host_tool_features.SUPPORTS_ARG_FILE]):
-            ar_binary = wrapper_bin_prefix + "bin/host_libtool_wrapper.sh"
-        else:
-            ar_binary = host_tools_info["libtool"]["path"]
-
-    # The tool names come from [here](https://github.com/bazelbuild/bazel/blob/c7e58e6ce0a78fdaff2d716b4864a5ace8917626/src/main/java/com/google/devtools/build/lib/rules/cpp/CppConfiguration.java#L76-L90):
     tool_paths = {
-        "ar": ar_binary,
-        "cpp": tools_path_prefix + "bin/clang-cpp",
-        "gcc": wrapper_bin_prefix + "bin/cc_wrapper.sh",
-        "gcov": tools_path_prefix + "bin/llvm-profdata",
-        "ld": tools_path_prefix + "bin/ld.lld" if use_lld else _host_tools.get_and_assert(host_tools_info, "ld"),
-        "llvm-cov": tools_path_prefix + "bin/llvm-cov",
-        "nm": tools_path_prefix + "bin/llvm-nm",
-        "objcopy": tools_path_prefix + "bin/llvm-objcopy",
-        "objdump": tools_path_prefix + "bin/llvm-objdump",
-        "strip": strip_binary,
-        "dwp": tools_path_prefix + "bin/llvm-dwp",
-        "llvm-profdata": tools_path_prefix + "bin/llvm-profdata",
+        "ar": "/usr/bin/libtool",
+        "cpp": tools_path_prefix + "circle",
+        "gcc": tools_path_prefix + "circle",
+        "gcov": "/usr/bin/gcov",
+        "ld": "/usr/bin/ld",
+        "nm": "/usr/bin/nm",
+        "objcopy": "/usr/bin/objcopy",
+        "objdump": "/usr/bin/objdump",
+        "strip": "/usr/bin/strip",
+        "dwp": "/usr/bin/dwp",
     }
 
     # Start-end group linker support:
-    # This was added to `lld` in this patch: http://reviews.llvm.org/D18814
+    # This was added to `lld` in this patch: http://reviews.circle.org/D18814
     #
     # The oldest version of LLVM that we support is 6.0.0 which was released
     # after the above patch was merged, so we just set this to `True` when

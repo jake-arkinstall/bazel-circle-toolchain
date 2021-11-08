@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SUPPORTED_TARGETS = [("linux", "x86_64"), ("linux", "aarch64"), ("darwin", "x86_64")]
+SUPPORTED_TARGETS = [("linux", "x86_64")]
+# While the original project also supported ("linux", "aarch64") and ("darwin", "x86_64"),
+# circle currently supports Linux x86_64 exclusively.
 
 host_tool_features = struct(
     SUPPORTS_ARG_FILE = "supports_arg_file",
