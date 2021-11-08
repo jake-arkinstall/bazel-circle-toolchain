@@ -1,8 +1,29 @@
-LLVM toolchain for Bazel [![Tests](https://github.com/grailbio/bazel-toolchain/actions/workflows/tests.yml/badge.svg)](https://github.com/grailbio/bazel-toolchain/actions/workflows/tests.yml) [![Migration](https://github.com/grailbio/bazel-toolchain/actions/workflows/migration.yml/badge.svg)](https://github.com/grailbio/bazel-toolchain/actions/workflows/migration.yml)
+Circle toolchain for Bazel [![Tests](https://github.com/jake-arkinstall/bazel-circle-toolchain/actions/workflows/tests.yml/badge.svg)](https://github.com/grailbio/bazel-toolchain/actions/workflows/tests.yml) [![Migration](https://github.com/grailbio/bazel-toolchain/actions/workflows/migration.yml/badge.svg)](https://github.com/jake-arkinstall/bazel-circle-toolchain/actions/workflows/migration.yml)
 =================
 
 -------
 
+This is a fork of the
+[grailbio/bazel-toolchain](https://github.com/grailbio/bazel-toolchain)
+project, which provides an easy-to-use method of obtaining a consistent LLVM
+toolchain for a bazel project. The main upshot of that project is increased
+hermeticity, as the compilation of your project is performed with the same
+compiler you developed it for.
+
+[Sean Baxter's](https://www.twitter.com/seanbax)
+[Circle](https://www.circle-lang.org/) is a language that builds upon C++ in
+a variety of ways. The compiler is a fresh C++ frontend for LLVM that includes
+a variety of additional features, most notably the meta context that allows
+for much more powerful code compile-time code execution than constexpr can
+provide.
+
+This project is designed to provide the Circle toolchain to bazel workspaces,
+making it easy to integrate into your project.
+
+-------
+The following is the existing readme for grailbio/bazel-toolchain. I will update
+it to represent the fork in due course.
+-------
 The project is in a relatively stable state and in use for all code development
 at GRAIL and other organizations. Having said that, I am unable to give time to
 it at any regular cadence.
